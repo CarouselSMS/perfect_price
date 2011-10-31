@@ -33,6 +33,8 @@ What it's not
 Defining a plan
 ---------------
 
+Plans are defined in `config/initializers/perfect_price.rb` like this:
+
     feature :projects,  label: "Projects", limit: 35
     feature :storage,   label: "Storage",  limit: 15, units: "Gb"
     feature :users,     label: "Users",    limit: UNLIMITED
