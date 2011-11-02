@@ -39,6 +39,8 @@ module PerfectPrice
   #     end
   class Plan
 
+    SNAPSHOT_KEYS = %w{ name label meta setup_fee monthly_fee }
+
     include Configurable
     option :name
     option :label
@@ -53,26 +55,26 @@ module PerfectPrice
       @monthly_fee = 0
     end
 
-    # Creates a new plan and fills it with data from JSON string or parsed hash specified.
-    def self.from_json(json)
-      hash = json.is_a?(String) ? JSON.parse(json) : json
+    # Creates a new plan and fills it with data from the snapshot hash specified.
+    def self.from_snapshot(hash)
       plan = PerfectPrice::Plan.new
       
-      %w{ name label meta setup_fee monthly_fee }.each do |opt|
-        plan.send(opt, hash[opt]) if hash.has_key?(opt)
-      end
-      
-      if hash.has_key?('features')
-        hash['features'].each do |feature_name, feature_json|
-          plan.features[feature_name.to_sym] = Feature.from_json(feature_json)
+      hash.each do |k, v|
+        k = k.to_s
+        if SNAPSHOT_KEYS.include?(k.to_s)
+          plan.send(k, v)
+        elsif k == 'features'
+          v.each do |feature_name, feature_hash|
+            plan.features[feature_name.to_sym] = Feature.from_snapshot(feature_hash)
+          end             
         end
       end
       
       plan
     end
     
-    # Serializes the plan instance into JSON string.
-    def to_json
+    # Serializes the plan instance into a hash.
+    def to_snapshot
       hash = {}
       
       %w{ name label meta setup_fee monthly_fee }.each do |opt|
@@ -83,7 +85,7 @@ module PerfectPrice
         hash[:features] = @features.inject({}) { |m, item| m[item[0]] = item[1].to_json; m }
       end
       
-      hash.to_json
+      hash
     end
     
   end

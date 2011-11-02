@@ -13,8 +13,8 @@ describe PerfectPrice::Feature do
     specify { feature.volume_discount_for(2000).should == 2 }
   end
 
-  describe 'to_json' do
-    specify { feature.to_json.should == '{}' }
+  describe 'to_snapshot' do
+    specify { feature.to_snapshot.should == {} }
     
     it 'should dump options' do
       feature.instance_eval do
@@ -25,25 +25,25 @@ describe PerfectPrice::Feature do
         volume_discounts  100 => 1, 200 => 2
       end
       
-      JSON.parse(feature.to_json).should == {
-        'name'              => 'mo',
-        'limit'             => 1000,
-        'unit_price'        => 0.05,
-        'bundled'           => 100,
-        'volume_discounts'  => { '100' => 1, '200' => 2 }
+      feature.to_snapshot.should == {
+        :name              => :mo,
+        :limit             => 1000,
+        :unit_price        => 0.05,
+        :bundled           => 100,
+        :volume_discounts  => { 100 => 1, 200 => 2 }
       }
     end
   end
   
-  describe 'from_json' do
+  describe 'from_snapshot' do
     let(:feature) do
-      PerfectPrice::Feature.from_json({
+      PerfectPrice::Feature.from_snapshot(
         'name'              => 'mo',
         'limit'             => 1000,
         'unit_price'        => 0.05,
         'bundled'           => 100,
         'volume_discounts'  => { '100' => 1, '200' => 2 }
-      }.to_json)
+      )
     end
     
     specify { feature.name.should             == :mo }

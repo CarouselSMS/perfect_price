@@ -130,3 +130,20 @@ When handling monthly payments, there also will be the updated `credits` section
 It's the intention that you get the details of the calculation in the `details` section for your records. This way you can explain how'd you come up with the number.
 
 The `credits` section contains the updated credits hash that you can put back into your `account` upon the successful transaction.
+
+
+Snapshots
+---------
+
+Sometimes you need to save a plan defition with all its features. The most common case
+is to freeze a plan for all existing subscribers, so that when you make changes to your
+current plans, it didn't affect billing of existing customers.
+
+Both plans and features support this by taking a snapshot into a JSON string and restoring
+everything from such JSON string.
+
+    plan.to_snapshot    # { :name => 'abc', :features => { :mo => {}, ... } }
+
+When you want to restore the plan, you do:
+
+    plan = Plan.from_snapshot(snapshot_hash)

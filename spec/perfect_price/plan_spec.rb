@@ -7,10 +7,10 @@ describe PerfectPrice::Plan do
     its(:monthly_fee) { should == 0 }
   end
   
-  describe 'to_json' do
+  describe 'to_snapshot' do
     let(:plan) { PerfectPrice::Plan.new }
 
-    specify { plan.to_json.should == { :setup_fee => 0, :monthly_fee => 0 }.to_json }
+    specify { plan.to_snapshot.should == { :setup_fee => 0, :monthly_fee => 0 } }
     
     it 'should dump basic options' do
       plan.instance_eval do
@@ -21,12 +21,12 @@ describe PerfectPrice::Plan do
         monthly_fee 20
       end
       
-      plan.to_json.should == {
+      plan.to_snapshot.should == {
         :name        => 'name_val',
         :label       => 'label_val',
         :meta        => { :a => 1, :b => 2 },
         :setup_fee   => 10,
-        :monthly_fee => 20 }.to_json
+        :monthly_fee => 20 }
     end
     
     it 'should dump features' do
@@ -35,27 +35,27 @@ describe PerfectPrice::Plan do
         feature     :mt, :limit => 5, :unit_price => 2
       end
       
-      res = JSON.parse(plan.to_json)
-      res.keys.should =~ %w{ features setup_fee monthly_fee }
-      res['features'].keys.should =~ %w{ mo mt }
+      res = plan.to_snapshot
+      res.keys.should =~ [ :features, :setup_fee, :monthly_fee ]
+      res[:features].keys.should =~ [ :mo, :mt ]
     end
   end
 
-  describe 'from_json' do
+  describe 'from_snapshot' do
     let(:plan) do
-      PerfectPrice::Plan.from_json({
+      PerfectPrice::Plan.from_snapshot(
         :name        => 'name_val',
         :label       => 'label_val',
         :meta        => { :description => 'descr_val' },
         :setup_fee   => 10,
         :monthly_fee => 20,
         :features    => { :mo => { :limit => 5 } }
-      }.to_json)
+      )
     end
     
     specify { plan.name.should == 'name_val' }
     specify { plan.label.should == 'label_val' }
-    specify { plan.meta.should == { 'description' => 'descr_val' } }
+    specify { plan.meta.should == { :description => 'descr_val' } }
     specify { plan.setup_fee.should == 10 }
     specify { plan.monthly_fee.should == 20 }
     specify { plan.features.size.should == 1 }

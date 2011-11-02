@@ -40,45 +40,46 @@ module PerfectPrice
       end
     end
 
-    # Creates a new feature and fills it with data from JSON string or parsed hash specified.
+    # Creates a new feature and fills it with data from hash specified.
     # Only recognized fields are set and some are converted to proper types:
     #
     # * <tt>name</tt> is converted to Symbol.
     # * <tt>volume_discounts</tt> is converted into the hash of integers mapped to the value as-is.
     #
     # Returns the <tt>Feature</tt> instance.
-    def self.from_json(json)
-      hash = json.is_a?(String) ? JSON.parse(json) : json
+    def self.from_snapshot(hash)
       feature = self.new
-      
-      %w{ limit unit_price bundled }.each do |opt|
-        feature.send(opt, hash[opt]) if hash.has_key?(opt)
-      end
-      
-      feature.name(hash['name'].to_sym) if hash.has_key?('name')
-      
-      if hash.has_key?('volume_discounts')
-        vd = hash['volume_discounts'].inject({}) do |m, vi|
-          k, v = *vi
-          m[k.to_i] = v
-          m
-        end
 
-        feature.volume_discounts vd
+      hash.each do |k, v|
+        k = k.to_s
+
+        if %w{ limit unit_price bundled }.include?(k)
+          feature.send(k, v)
+        elsif k == 'name'
+          feature.name(v.to_sym)
+        elsif k == 'volume_discounts'
+          vd = v.inject({}) do |m, vi|
+            k, d = *vi
+            m[k.to_i] = d
+            m
+          end
+
+          feature.volume_discounts vd
+        end
       end
       
       feature
     end
     
-    # Serializes the feature instance into JSON string.
-    def to_json
+    # Serializes the feature instance into hash.
+    def to_snapshot
       hash = {}
       
       %w{ name limit unit_price bundled volume_discounts }.each do |opt|
         hash[opt.to_sym] = self.send(opt) if self.send(opt)
       end
       
-      hash.to_json
+      hash
     end
     
   end
