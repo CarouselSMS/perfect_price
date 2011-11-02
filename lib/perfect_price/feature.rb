@@ -20,7 +20,7 @@ module PerfectPrice
   #
   # Both types of definitions (through the inline hash and block) are equivalent.
 
-  class Feature :nodoc:
+  class Feature # :nodoc:
 
     include Configurable
     option :name
@@ -40,5 +40,15 @@ module PerfectPrice
       end
     end
 
+    def to_json
+      hash = {}
+      
+      %w{ name limit unit_price bundled volume_discounts }.each do |opt|
+        hash[opt.to_sym] = self.send(opt) if self.send(opt)
+      end
+      
+      hash.to_json
+    end
+    
   end
 end

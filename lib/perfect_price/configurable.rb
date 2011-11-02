@@ -98,7 +98,7 @@ module PerfectPrice
         end
       end
     end
-  
+    
     def self.included(receiver)
       receiver.extend ClassMethods
     end

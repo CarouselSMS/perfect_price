@@ -52,5 +52,19 @@ module PerfectPrice
       @setup_fee   = 0
       @monthly_fee = 0
     end
+    
+    def to_json
+      hash = {}
+      
+      %w{ name label meta setup_fee monthly_fee }.each do |opt|
+        hash[opt.to_sym] = self.send(opt) if self.send(opt)
+      end
+      
+      if @features
+        hash[:features] = @features.inject({}) { |m, item| m[item[0]] = item[1].to_json; m }
+      end
+      
+      hash.to_json
+    end
   end
 end

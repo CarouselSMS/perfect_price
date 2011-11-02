@@ -1,9 +1,10 @@
 require "rubygems"
 require "hashie"
+require "json"
 require "perfect_price/version"
-require 'perfect_price/configurable'
-require 'perfect_price/feature'
-require 'perfect_price/plan'
+require "perfect_price/configurable"
+require "perfect_price/feature"
+require "perfect_price/plan"
 require "perfect_price/configuration"
 require "perfect_price/calculations"
 
