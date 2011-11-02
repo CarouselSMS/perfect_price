@@ -34,5 +34,22 @@ describe PerfectPrice::Feature do
       }
     end
   end
+  
+  describe 'from_json' do
+    let(:feature) do
+      PerfectPrice::Feature.from_json({
+        'name'              => 'mo',
+        'limit'             => 1000,
+        'unit_price'        => 0.05,
+        'bundled'           => 100,
+        'volume_discounts'  => { '100' => 1, '200' => 2 }
+      }.to_json)
+    end
+    
+    specify { feature.name.should             == :mo }
+    specify { feature.limit.should            == 1000 }
+    specify { feature.unit_price.should       == 0.05 }
+    specify { feature.volume_discounts.should == { 100 => 1, 200 => 2 } }
+  end
 
 end

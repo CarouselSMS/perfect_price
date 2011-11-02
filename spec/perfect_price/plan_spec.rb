@@ -41,4 +41,24 @@ describe PerfectPrice::Plan do
     end
   end
 
+  describe 'from_json' do
+    let(:plan) do
+      PerfectPrice::Plan.from_json({
+        :name        => 'name_val',
+        :label       => 'label_val',
+        :meta        => { :description => 'descr_val' },
+        :setup_fee   => 10,
+        :monthly_fee => 20,
+        :features    => { :mo => { :limit => 5 } }
+      }.to_json)
+    end
+    
+    specify { plan.name.should == 'name_val' }
+    specify { plan.label.should == 'label_val' }
+    specify { plan.meta.should == { 'description' => 'descr_val' } }
+    specify { plan.setup_fee.should == 10 }
+    specify { plan.monthly_fee.should == 20 }
+    specify { plan.features.size.should == 1 }
+    specify { plan.feature(:mo).limit.should == 5 }
+  end
 end

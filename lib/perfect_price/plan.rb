@@ -52,7 +52,26 @@ module PerfectPrice
       @setup_fee   = 0
       @monthly_fee = 0
     end
+
+    # Creates a new plan and fills it with data from JSON string or parsed hash specified.
+    def self.from_json(json)
+      hash = json.is_a?(String) ? JSON.parse(json) : json
+      plan = PerfectPrice::Plan.new
+      
+      %w{ name label meta setup_fee monthly_fee }.each do |opt|
+        plan.send(opt, hash[opt]) if hash.has_key?(opt)
+      end
+      
+      if hash.has_key?('features')
+        hash['features'].each do |feature_name, feature_json|
+          plan.features[feature_name.to_sym] = Feature.from_json(feature_json)
+        end
+      end
+      
+      plan
+    end
     
+    # Serializes the plan instance into JSON string.
     def to_json
       hash = {}
       
@@ -66,5 +85,6 @@ module PerfectPrice
       
       hash.to_json
     end
+    
   end
 end
