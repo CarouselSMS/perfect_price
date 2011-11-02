@@ -35,43 +35,45 @@ Defining a plan
 
 Plans are defined in `config/initializers/perfect_price.rb` like this:
 
-    PerfectPrice.configure do |c|
+    PerfectPrice.configure do
 
-      c.feature :projects,  :label => "Projects", :limit => 35
-      c.feature :storage,   :label => "Storage",  :limit => 15, :units => "Gb"
-      c.feature :users,     :label => "Users",    :limit => PerfectPrice::UNLIMITED
-      c.feature :mo
-      c.feature :mt,        :base_price       => 0.05,
-                            :bundled          => 100
-                            :volume_discounts => {
-                                20000   => 0.005,
-                                50000   => 0.01,
-                                100000  => 0.015,
-                                250000  => 0.02,
-                                500000  => 0.025,
-                                1000000 => 0.03 }
+      feature :projects,  :label => "Projects", :limit => 35
+      feature :storage,   :label => "Storage",  :limit => 15, :units => "Gb"
+      feature :users,     :label => "Users",    :limit => PerfectPrice::UNLIMITED
+      feature :mo
+      feature :mt,        :unit_price       => 0.05,
+                          :bundled          => 100
+                          :volume_discounts => {
+                              20000   => 0.005,
+                              50000   => 0.01,
+                              100000  => 0.015,
+                              250000  => 0.02,
+                              500000  => 0.025,
+                              1000000 => 0.03 }
     
-      c.plan :max, :label => 'Max' do |p|
-        p.setup_fee    100
-        p.monthly_fee  149
-        p.custom       { :label => "Top-of-the-line" }
-        p.limits       :projects  => PerfectPrice::UNLIMITED,
-                       :storage   => 75,
-                       :notes     => PerfectPrice::UNLIMITED
+      plan :max, :label => 'Max' do
+        setup_fee    100
+        monthly_fee  149
+        meta         :label => "Top-of-the-line"
+        
+        feature      :projects => PerfectPrice::UNLIMITED
+        feature      :storage  => 75
+        feature      :notes    => PerfectPrice::UNLIMITED
       end
     
-      c.plan :premium, :label => 'Premium' do |p|
-        p.setup_fee    100
-        p.monthly_feee 99
-        p.custom       { :label => "The Sweet Spot" }
-        p.limits       :projects  => 100,
-                       :storage   => 30
+      plan :premium, :label => 'Premium' do
+        setup_fee    100
+        monthly_feee 99
+        meta         :label => "The Sweet Spot"
+
+        feature      :projects, :limit => 100
+        feature      :storage, :limit => 30
       end
     
-      c.plan :plus, :label => 'Plus' do |p|
-        p.setup_fee    100
-        p.monthly_fee  49
-        p.custom       { :label => "For Small Groups" }
+      plan :plus, :label => 'Plus' do
+        setup_fee    100
+        monthly_fee  49
+        meta         :label => "For Small Groups"
       end
 
     end
@@ -118,12 +120,12 @@ When the time comes to calculate the monthly payment you do it like this:
 
 In both cases the `payment` structure being returned contains the following:
 
-    payment[:total]      # X + Y
-    payment[:details]    # { 'monthy_fee' => X, 'feature_a' => Y }
+    payment.total      # X + Y
+    payment.details    # { 'monthy_fee' => X, 'feature_a' => Y }
 
 When handling monthly payments, there also will be the updated `credits` section:
 
-    payment[:credits]    # { :feature_a => 0 }
+    payment.credits    # { :feature_a => 0 }
 
 It's the intention that you get the details of the calculation in the `details` section for your records. This way you can explain how'd you come up with the number.
 

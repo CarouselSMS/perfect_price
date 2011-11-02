@@ -2,6 +2,12 @@ module PerfectPrice
   module Calculations
     
     # Calculating the initial payment for the account given the plan.
+    #
+    # Returns the hash with the following keys:
+    #
+    # * <tt>:total</tt> - total payable.
+    # * <tt>:details</tt> - detailed breakdown of the total in the form of a hash.
+    #
     def initial_payment(plan)
       Hashie::Mash.new(
         :total   => plan.setup_fee,
@@ -12,6 +18,20 @@ module PerfectPrice
     
     # Calculating the monthly payment for the account given the plan
     # and options.
+    #
+    # Available options:
+    #
+    # * <tt>:credits</tt> - the hash mapping feature names to the number of credits left.
+    #
+    # * <tt>:usage</tt> - the hash mapping feature names to the number of items used
+    #   during this period.
+    #
+    # Returns the hash:
+    #
+    # * <tt>:total</tt> - total payable.
+    # * <tt>:details</tt> - detailed breakdown of the total by features and fees.
+    # * <tt>:credits</tt> - updated credits hash.
+    #
     def monthly_payment(plan, options = {})
       total = plan.monthly_fee
       details = { :monthly_fee => total }
@@ -31,7 +51,7 @@ module PerfectPrice
     private
     
     def include_feature_usage(plan, details, feature_name, usage, credits)
-      feature = plan.feature_by_name(feature_name)
+      feature = plan.feature(feature_name)
       return 0 if !feature
 
       # Get discount for original usage
@@ -54,7 +74,8 @@ module PerfectPrice
       end
       
       # Calculate the cost of the rest
-      feature_total = usage * (feature.base_price - discount)
+      unit_price = feature.unit_price || self.config.feature(feature_name).unit_price
+      feature_total = usage * (feature.unit_price - discount)
       details["#{feature_name}_fee"] = feature_total
 
       return feature_total

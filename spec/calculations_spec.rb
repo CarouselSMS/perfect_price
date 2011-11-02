@@ -4,22 +4,22 @@ describe PerfectPrice, 'calculations' do
   
   SETUP_FEE            = 100
   MONTHLY_FEE          = 10
-  BASE_PRICE           = 5
+  UNIT_PRICE           = 5
   BUNDLED              = 10
   VOLUME_DISCOUNT_1000 = 1
   VOLUME_DISCOUNT_2000 = 2
   
-  let(:plan) { PerfectPrice.plan_by_name(:easy) }
+  let(:plan) { PerfectPrice.plan(:easy) }
 
   before do
-    PerfectPrice.configure do |c|
-      c.feature :mt,  :base_price       => BASE_PRICE,
-                      :bundled          => BUNDLED,
-                      :volume_discounts => { 1000 => VOLUME_DISCOUNT_1000, 2000 => VOLUME_DISCOUNT_2000 }
+    PerfectPrice.configure do
+      feature :mt,  :unit_price       => UNIT_PRICE,
+                    :bundled          => BUNDLED,
+                    :volume_discounts => { 1000 => VOLUME_DISCOUNT_1000, 2000 => VOLUME_DISCOUNT_2000 }
 
-      c.plan :easy do |p|
-        p.setup_fee   SETUP_FEE
-        p.monthly_fee MONTHLY_FEE
+      plan :easy do |p|
+        setup_fee   SETUP_FEE
+        monthly_fee MONTHLY_FEE
       end
     end
   end
@@ -45,18 +45,18 @@ describe PerfectPrice, 'calculations' do
     
     context 'feature usage is over bundled' do
       let(:payment) { PerfectPrice.monthly_payment(plan, :usage => { :mt => 15 }) }
-      specify { payment.total.should    == MONTHLY_FEE + BASE_PRICE * (15 - BUNDLED) }
+      specify { payment.total.should    == MONTHLY_FEE + UNIT_PRICE * (15 - BUNDLED) }
     end
     
     context 'with volume discount' do
       let(:payment) { PerfectPrice.monthly_payment(plan, :usage => { :mt => 1001 }) }
-      specify { payment.total.should    == MONTHLY_FEE + (BASE_PRICE - VOLUME_DISCOUNT_1000) * (1001 - BUNDLED) }
+      specify { payment.total.should    == MONTHLY_FEE + (UNIT_PRICE - VOLUME_DISCOUNT_1000) * (1001 - BUNDLED) }
     end
     
     context 'with credits' do
       let(:payment) { PerfectPrice.monthly_payment(plan, :usage => { :mt => BUNDLED + 100 }, :credits => { :mt => 90 }) }
-      specify { payment.total.should    == MONTHLY_FEE + BASE_PRICE * 10 }
-      specify { payment.details.should  == { 'monthly_fee' => MONTHLY_FEE, 'mt_fee' => 10 * BASE_PRICE, 'mt_credits_used' => 90, 'mt_bundled_used' => BUNDLED } }
+      specify { payment.total.should    == MONTHLY_FEE + UNIT_PRICE * 10 }
+      specify { payment.details.should  == { 'monthly_fee' => MONTHLY_FEE, 'mt_fee' => 10 * UNIT_PRICE, 'mt_credits_used' => 90, 'mt_bundled_used' => BUNDLED } }
       specify { payment.credits.should  == { 'mt' => 0 } }
     end
   end
