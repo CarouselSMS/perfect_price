@@ -147,3 +147,11 @@ everything from such JSON string.
 When you want to restore the plan, you do:
 
     plan = Plan.from_snapshot(snapshot_hash)
+
+License
+=======
+
+perfect_price is Copyright © 2013 [Aleksey Gureiev](mailto:spyromus@noizeramp.com) and [Recess Mobile](http://recess.im/).
+
+It is free software, and may be redistributed under the terms specified in the MIT-LICENSE file.
+
